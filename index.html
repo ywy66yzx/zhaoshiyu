@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>致最好的小赵同学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #d6e8f5 0%, #b8d8ee 50%, #a3cce8 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* ========== 开屏粉色爱心动画层 ========== */
+        .heart-intro {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at 50% 45%, #2a0f1e 0%, #150812 60%, #0a0510 100%);
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.2s;
+            pointer-events: all;
+        }
+
+        .heart-intro.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .big-heart-container {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .small-heart {
+            position: absolute;
+            font-size: 22px;
+            color: #ff7eb9;
+            text-shadow: 0 0 10px rgba(255, 100, 170, 0.9),
+                         0 0 20px rgba(255, 80, 150, 0.5);
+            user-select: none;
+            animation-name: heartBeat;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            will-change: transform;
+        }
+
+        .center-heart {
+            position: absolute;
+            font-size: 60px;
+            color: #ff4d94;
+            text-shadow: 0 0 30px rgba(255, 80, 150, 1),
+                         0 0 60px rgba(255, 60, 130, 0.7),
+                         0 0 100px rgba(255, 40, 120, 0.4);
+            animation: centerPulse 1.4s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ffc0e0;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ff9ac8;
+            animation: sparkleFloat 3s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+
+        .intro-text {
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            color: #ffb8d8;
+            font-size: 1.6rem;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px rgba(255, 100, 170, 0.8),
+                         0 0 40px rgba(255, 80, 150, 0.4);
+            font-weight: 300;
+            animation: textFadeIn 2s ease-in-out infinite alternate;
+        }
+
+        .intro-text span {
+            display: inline-block;
+            animation: letterFloat 2s ease-in-out infinite;
+        }
+        .intro-text span:nth-child(1) { animation-delay: 0s; }
+        .intro-text span:nth-child(2) { animation-delay: 0.15s; }
+        .intro-text span:nth-child(3) { animation-delay: 0.3s; }
+        .intro-text span:nth-child(4) { animation-delay: 0.45s; }
+        .intro-text span:nth-child(5) { animation-delay: 0.6s; }
+
+        .skip-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #b07a9e;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            opacity: 0.7;
+            animation: hintBlink 2s infinite;
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        /* ========== 主界面：书本样式 ========== */
+        .book-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+            perspective: 2500px;
+        }
+
+        .book-wrapper.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .book {
+            position: relative;
+            width: 100%;
+            height: 620px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+        }
+
+        .book:active {
+            cursor: grabbing;
+        }
+
+        .book::before,
+        .book::after {
+            content: '';
+            position: absolute;
+            width: 96%;
+            height: 96%;
+            border-radius: 12px;
+            background: #eaf5fc;
+            box-shadow: 0 4px 12px rgba(100, 150, 190, 0.2);
+        }
+        .book::before {
+            top: 8px;
+            left: 2%;
+            transform: rotate(-1.5deg);
+            z-index: 1;
+        }
+        .book::after {
+            top: 4px;
+            left: 1%;
+            transform: rotate(-0.8deg);
+            z-index: 2;
+        }
+
+        .book-spine {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(90deg, #8ec4e8 0%, #b8d8ee 40%, #d0e6f5 100%);
+            border-radius: 12px 0 0 12px;
+            box-shadow: inset -3px 0 8px rgba(100, 150, 190, 0.3);
+            z-index: 20;
+        }
+
+        .pages-container {
+            position: relative;
+            width: calc(100% - 20px);
+            height: 96%;
+            margin-left: 10px;
+            z-index: 10;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(100, 150, 190, 0.35),
+                        inset 0 0 40px rgba(160, 200, 230, 0.1);
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, #fdfeff 0%, #f4faff 100%);
+            padding: 0;
+            overflow-y: auto;
+            transform-origin: left center;
+            transition: transform 0.85s cubic-bezier(0.25, 0.8, 0.25, 1),
+                        opacity 0.6s ease,
+                        filter 0.6s ease;
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+            border-radius: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #b8d8ee #f4faff;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(160, 200, 230, 0.08));
+            pointer-events: none;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .page.current {
+            z-index: 10;
+            transform: rotateY(0deg);
+            opacity: 1;
+            filter: brightness(1);
+        }
+
+        .page.next {
+            z-index: 8;
+            transform: rotateY(10deg);
+            opacity: 0.7;
+            filter: brightness(0.95);
+        }
+
+        .page.prev {
+            z-index: 8;
+            transform: rotateY(-10deg);
+            opacity: 0.7;
+            filter: brightness(0.95);
+        }
+
+        .page.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ========== 每一页：图片配文字 ========== */
+        .page-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .page-image {
+            width: 100%;
+            height: 55%;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+            background: #eaf5fc;
+        }
+
+        .page-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .page:hover .page-image img {
+            transform: scale(1.04);
+        }
+
+        .page-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(180deg, transparent, rgba(244, 250, 255, 0.95));
+            pointer-events: none;
+        }
+
+        .page-text {
+            flex: 1;
+            padding: 28px 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .page-text .date {
+            font-size: 0.85rem;
+            color: #a0bcd4;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .page-text .title {
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: #3a6a8e;
+            letter-spacing: 2px;
+            line-height: 1.3;
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        .page-text .title::after {
+            content: '❤';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            font-size: 0.9rem;
+            color: #7ab0d4;
+        }
+
+        .page-text .story {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: #5a7a96;
+            font-style: italic;
+            letter-spacing: 0.3px;
+        }
+
+        /* ========== 第八页：信纸样式 ========== */
+        .letter-page {
+            background: linear-gradient(180deg, #fdfeff 0%, #f4faff 100%);
+            padding: 40px 48px 36px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .letter-paper {
+            flex: 1;
+            background-image: repeating-linear-gradient(
+                180deg,
+                transparent 0px,
+                transparent 31px,
+                rgba(160, 200, 230, 0.25) 31px,
+                rgba(160, 200, 230, 0.25) 32px
+            );
+            background-position: 0 10px;
+            padding: 4px 8px 8px;
+            position: relative;
+        }
+
+        .letter-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(120, 170, 210, 0.5), transparent);
+        }
+
+        .letter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .letter-header .letter-title {
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: #3a6a8e;
+            letter-spacing: 3px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .letter-header .letter-title::after {
+            content: '✉';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            font-size: 0.9rem;
+            color: #7ab0d4;
+        }
+
+        .letter-header .letter-date {
+            font-size: 0.8rem;
+            color: #a0bcd4;
+            letter-spacing: 2px;
+        }
+
+        .letter-salutation {
+            font-size: 1.1rem;
+            color: #3a6a8e;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .letter-body {
+            font-size: 1.05rem;
+            line-height: 2.1;
+            color: #4a6a86;
+            letter-spacing: 0.4px;
+            text-indent: 2em;
+            margin-bottom: 24px;
+        }
+
+        .letter-signature {
+            margin-top: 26px;
+            text-align: right;
+            font-size: 1.05rem;
+            color: #3a6a8e;
+            letter-spacing: 1px;
+            line-height: 2;
+            font-style: italic;
+        }
+
+        .letter-signature .heart-sign {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 1.3rem;
+            color: #ff7eb9;
+            animation: heartBeat 1.4s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 100, 170, 0.6);
+        }
+
+        /* ========== 第九页：照片墙（2×2 四宫格） ========== */
+        .gallery-page {
+            background: linear-gradient(180deg, #fdfeff 0%, #f4faff 100%);
+            padding: 30px 36px 28px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .gallery-title {
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: #3a6a8e;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 6px;
+            position: relative;
+            padding-bottom: 14px;
+        }
+
+        .gallery-title::after {
+            content: '❤';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #7ab0d4;
+        }
+
+        .gallery-sub {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #a0bcd4;
+            letter-spacing: 1px;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        /* 四宫格：2列2行 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #eaf5fc;
+            box-shadow: 0 4px 14px rgba(100, 150, 190, 0.22);
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 22px rgba(100, 150, 190, 0.38);
+            z-index: 2;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px 10px 10px;
+            background: linear-gradient(180deg, transparent, rgba(20, 40, 65, 0.7));
+            color: #fff;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .gallery-item:hover .caption {
+            opacity: 1;
+        }
+
+        /* 图片放大遮罩 */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(10, 25, 45, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            cursor: zoom-out;
+        }
+
+        .lightbox.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 85%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
+                        0 0 0 1px rgba(200, 225, 245, 0.3);
+            transform: scale(0.92);
+            transition: transform 0.3s ease;
+        }
+
+        .lightbox.show img {
+            transform: scale(1);
+        }
+
+        .lightbox .close-btn {
+            position: absolute;
+            top: 24px;
+            right: 30px;
+            color: #d0e6f5;
+            font-size: 2rem;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .lightbox .close-btn:hover {
+            opacity: 1;
+        }
+
+        /* ========== BGM 音乐按钮（固定右下角） ========== */
+        .bgm-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1500;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 1px solid rgba(120, 180, 230, 0.6);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 6px 20px rgba(80, 130, 180, 0.35),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
+            color: #3a6a8e;
+            font-size: 1.4rem;
+            padding: 0;
+            outline: none;
+        }
+
+        .bgm-btn:hover {
+            transform: scale(1.08);
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 8px 26px rgba(80, 130, 180, 0.5);
+        }
+
+        .bgm-btn:active {
+            transform: scale(0.95);
+        }
+
+        .bgm-btn.playing {
+            background: rgba(180, 220, 255, 0.75);
+            border-color: rgba(90, 160, 220, 0.9);
+            box-shadow: 0 0 0 3px rgba(120, 180, 230, 0.25),
+                        0 8px 26px rgba(80, 130, 180, 0.5);
+        }
+
+        /* 音符跳动动画 */
+        .bgm-btn .music-icon {
+            display: inline-block;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .bgm-btn.playing .music-icon {
+            animation: noteBounce 0.7s ease-in-out infinite alternate;
+        }
+
+        @keyframes noteBounce {
+            0% { transform: translateY(0) rotate(-4deg); }
+            100% { transform: translateY(-4px) rotate(4deg); }
+        }
+
+        /* 音乐播放时的光环扩散 */
+        .bgm-btn::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(120, 180, 230, 0.5);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .bgm-btn.playing::after {
+            animation: ripple 2s ease-out infinite;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        .page-corner {
+            position: absolute;
+            bottom: 14px;
+            right: 24px;
+            font-size: 0.75rem;
+            color: #b8d8ee;
+            letter-spacing: 1px;
+            z-index: 5;
+        }
+
+        .page-counter {
+            position: absolute;
+            bottom: -38px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #7a9eb8;
+            letter-spacing: 3px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .page-counter .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #c0ddf0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .page-counter .dot:hover {
+            background: #8ec4e8;
+        }
+
+        .page-counter .dot.active {
+            background: #5a9ac4;
+            transform: scale(1.3);
+            box-shadow: 0 0 8px rgba(90, 154, 196, 0.5);
+        }
+
+        .drag-hint {
+            position: absolute;
+            top: 50%;
+            right: -70px;
+            transform: translateY(-50%);
+            color: #7a9eb8;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            writing-mode: vertical-rl;
+            opacity: 0.5;
+            animation: hintBlink 2.5s infinite;
+            pointer-events: none;
+        }
+
+        /* ========== 关键帧动画 ========== */
+        @keyframes heartBeat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.35); }
+        }
+
+        @keyframes centerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            50% { transform: translate(var(--tx, 5px), var(--ty, -8px)) scale(1.6); opacity: 1; }
+        }
+
+        @keyframes textFadeIn {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes letterFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes hintBlink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        /* 响应式 */
+        @media (max-width: 700px) {
+            .book {
+                height: 560px;
+            }
+
+            .page-image {
+                height: 45%;
+            }
+
+            .page-text {
+                padding: 20px 24px 24px;
+            }
+
+            .page-text .title {
+                font-size: 1.4rem;
+            }
+
+            .page-text .story {
+                font-size: 0.95rem;
+                line-height: 1.8;
+            }
+
+            .letter-page {
+                padding: 24px 22px 22px;
+            }
+
+            .letter-header .letter-title {
+                font-size: 1.3rem;
+            }
+
+            .letter-body {
+                font-size: 0.95rem;
+                line-height: 1.95;
+            }
+
+            .letter-salutation {
+                font-size: 1rem;
+            }
+
+            .gallery-page {
+                padding: 20px 18px 20px;
+            }
+
+            .gallery-title {
+                font-size: 1.3rem;
+            }
+
+            .gallery-grid {
+                gap: 12px;
+            }
+
+            .gallery-item .caption {
+                opacity: 1;
+                font-size: 0.75rem;
+                padding: 16px 6px 6px;
+            }
+
+            .drag-hint {
+                display: none;
+            }
+
+            .page-counter {
+                bottom: -32px;
+                gap: 6px;
+            }
+
+            .page-counter .dot {
+                width: 8px;
+                height: 8px;
+            }
+
+            .big-heart-container {
+                width: 260px;
+                height: 260px;
+            }
+
+            .small-heart {
+                font-size: 16px;
+            }
+
+            .center-heart {
+                font-size: 44px;
+            }
+
+            .intro-text {
+                font-size: 1.2rem;
+                letter-spacing: 4px;
+                bottom: -60px;
+            }
+
+            .bgm-btn {
+                width: 46px;
+                height: 46px;
+                right: 16px;
+                bottom: 16px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .book {
+                height: 540px;
+            }
+
+            .page-image {
+                height: 42%;
+            }
+
+            .page-text {
+                padding: 16px 20px 20px;
+            }
+
+            .page-text .title {
+                font-size: 1.2rem;
+            }
+
+            .page-text .story {
+                font-size: 0.9rem;
+                line-height: 1.7;
+            }
+
+            .letter-page {
+                padding: 18px 16px 18px;
+            }
+
+            .letter-header .letter-title {
+                font-size: 1.15rem;
+            }
+
+            .letter-body {
+                font-size: 0.88rem;
+                line-height: 1.85;
+            }
+
+            .letter-signature {
+                font-size: 0.95rem;
+            }
+
+            .gallery-page {
+                padding: 16px 14px 16px;
+            }
+
+            .gallery-title {
+                font-size: 1.15rem;
+            }
+
+            .gallery-grid {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== 开屏粉色爱心动画层 ========== -->
+    <div class="heart-intro" id="heartIntro">
+        <div class="big-heart-container" id="bigHeartContainer">
+            <div class="center-heart">❤</div>
+        </div>
+        <div class="intro-text">
+            <span>致</span><span> · </span><span>我</span><span>们</span>
+        </div>
+        <div class="skip-hint">点击任意处继续</div>
+    </div>
+
+    <!-- ========== 主界面：书本式翻阅 ========== -->
+    <div class="book-wrapper" id="bookWrapper">
+        <div class="book" id="book">
+            <div class="book-spine"></div>
+            <div class="pages-container" id="pagesContainer">
+
+                <!-- 第1页：封面 -->
+                <div class="page" data-index="0">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=900&q=80&fit=crop" alt="星空下的回忆">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">序 · 致我们</div>
+                            <div class="title">那些浅蓝色的回忆</div>
+                            <div class="story">
+                                有些友谊，像一本永远翻不完的书。<br>
+                                每一页都藏着我们共同的回忆。<br>
+                                翻开它，仿佛又回到了那段时光。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">1 / 9</div>
+                </div>
+
+                <!-- ========== 第2页：高中时期 ========== -->
+                <div class="page" data-index="1">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <!-- 👇 将下面 src 替换为您的第1张照片路径 -->
+                            <img src="your-photo-1.jpg" alt="高中时期">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">同桌的我们</div>
+                            <div class="title">高中时期</div>
+                            <div class="story">
+                                那时候，我们还是同桌，我们一起谈天说地，小说，电视剧，电影。一起讨论喜欢的小说，听你描述我没看过的电影，互相安利。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">2 / 9</div>
+                </div>
+
+                <!-- ========== 第3页：签名 ========== -->
+                <div class="page" data-index="2">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <!-- 👇 将下面 src 替换为您的第2张照片路径 -->
+                            <img src="your-photo-2.jpg" alt="签名">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">毕业前最后一晚</div>
+                            <div class="title">你的签名</div>
+                            <div class="story">
+                                你给我的签名不知何时能升值，嘻嘻。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">3 / 9</div>
+                </div>
+
+                <!-- ========== 第4页：毕业后 · KTV ========== -->
+                <div class="page" data-index="3">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <!-- 👇 将下面 src 替换为您的第3张照片路径 -->
+                            <img src="your-photo-3.jpg" alt="一起去KTV">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">毕业后</div>
+                            <div class="title">一起去KTV</div>
+                            <div class="story">
+                                我们一起去KTV，不过是我听你们唱。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">4 / 9</div>
+                </div>
+
+                <!-- ========== 第5页：毕业后 · 压马路 ========== -->
+                <div class="page" data-index="4">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <!-- 👇 将下面 src 替换为您的第4张照片路径 -->
+                            <img src="your-photo-4.jpg" alt="一起压马路">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">毕业后</div>
+                            <div class="title">一起压马路</div>
+                            <div class="story">
+                                我们沿着街道走了很久很久，什么都说，又好像什么都没说。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">5 / 9</div>
+                </div>
+
+                <!-- ========== 第6页：一起放烟花 ========== -->
+                <div class="page" data-index="5">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <!-- 👇 将下面 src 替换为您的第5张照片路径 -->
+                            <img src="your-photo-5.jpg" alt="一起放烟花">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">某个夜晚</div>
+                            <div class="title">一起放烟花</div>
+                            <div class="story">
+                                我们一起放烟花，看着漫天的光，觉得这样的夜晚可以记很久很久。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">6 / 9</div>
+                </div>
+
+                <!-- ========== 第7页：聊天到深夜 ========== -->
+                <div class="page" data-index="6">
+                    <div class="page-inner">
+                        <div class="page-image">
+                            <!-- 👇 将下面 src 替换为您的第6张照片路径 -->
+                            <img src="your-photo-6.jpg" alt="聊天到深夜">
+                        </div>
+                        <div class="page-text">
+                            <div class="date">无数个夜晚</div>
+                            <div class="title">聊天到深夜</div>
+                            <div class="story">
+                                我们一起聊天到深夜，忘了时间，也忘了困意。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">7 / 9</div>
+                </div>
+
+                <!-- ========== 第8页：一封信 ========== -->
+                <div class="page" data-index="7">
+                    <div class="letter-page">
+                        <div class="letter-paper">
+                            <div class="letter-header">
+                                <div class="letter-title">写给小赵同学</div>
+                                <div class="letter-date">一封信</div>
+                            </div>
+                            <div class="letter-salutation">亲爱的小赵同学：</div>
+                            <div class="letter-body">
+                                虽然我们参加工作后，大家都有彼此的生活要忙，聊天频率比起之前有所降低，相隔两地，见面机会也减少了，但是我会想你的，期待下次相见。
+                            </div>
+                            <div class="letter-signature">
+                                游在你心里的小鱼儿<br>
+                                <span class="heart-sign">❤</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">8 / 9</div>
+                </div>
+
+                <!-- ========== 第9页：照片墙（2×2 四宫格） ========== -->
+                <div class="page" data-index="8">
+                    <div class="gallery-page">
+                        <div class="gallery-title">我们的照片墙</div>
+                        <div class="gallery-sub">— 点击照片可以放大查看 —</div>
+                        <div class="gallery-grid" id="galleryGrid">
+                            <!-- 👇 四张照片，将 src 替换为您的照片路径 -->
+                            <div class="gallery-item">
+                                <img src="gallery-1.jpg" alt="回忆照片1">
+                                <div class="caption">最好的我们</div>
+                            </div>
+                            <div class="gallery-item">
+                                <img src="gallery-2.jpg" alt="回忆照片2">
+                                <div class="caption">一起走过</div>
+                            </div>
+                            <div class="gallery-item">
+                                <img src="gallery-3.jpg" alt="回忆照片3">
+                                <div class="caption">笑得很甜</div>
+                            </div>
+                            <div class="gallery-item">
+                                <img src="gallery-4.jpg" alt="回忆照片4">
+                                <div class="caption">永远的朋友</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-corner">9 / 9</div>
+                </div>
+
+            </div>
+            <!-- 翻页指示点 -->
+            <div class="page-counter" id="pageCounter">
+                <span class="dot active" data-dot="0"></span>
+                <span class="dot" data-dot="1"></span>
+                <span class="dot" data-dot="2"></span>
+                <span class="dot" data-dot="3"></span>
+                <span class="dot" data-dot="4"></span>
+                <span class="dot" data-dot="5"></span>
+                <span class="dot" data-dot="6"></span>
+                <span class="dot" data-dot="7"></span>
+                <span class="dot" data-dot="8"></span>
+            </div>
+            <div class="drag-hint">↔ 拖拽翻页</div>
+        </div>
+    </div>
+
+    <!-- 图片放大遮罩 -->
+    <div class="lightbox" id="lightbox">
+        <button class="close-btn" id="lightboxClose">×</button>
+        <img id="lightboxImg" src="" alt="放大的照片">
+    </div>
+
+    <!-- ========== BGM 音乐按钮 ========== -->
+    <button class="bgm-btn" id="bgmBtn" aria-label="播放背景音乐" title="播放背景音乐">
+        <span class="music-icon" id="bgmIcon">🎵</span>
+    </button>
+
+    <!-- 背景音乐：将 src 替换为您的音乐文件路径 -->
+    <audio id="bgmAudio" loop preload="auto">
+        <source src="bgm.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放。
+    </audio>
+
+    <script>
+        (function() {
+            // ========== 粉色爱心开屏 ==========
+            const bigHeartContainer = document.getElementById('bigHeartContainer');
+            const heartIntro = document.getElementById('heartIntro');
+            const bookWrapper = document.getElementById('bookWrapper');
+
+            const totalHearts = 40;
+            const radiusScale = 8.5;
+
+            for (let i = 0; i < totalHearts; i++) {
+                const t = (i / totalHearts) * Math.PI * 2;
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+
+                const posX = x * radiusScale;
+                const posY = -y * radiusScale;
+
+                const heart = document.createElement('div');
+                heart.className = 'small-heart';
+                heart.textContent = '❤';
+                heart.style.left = `calc(50% + ${posX}px)`;
+                heart.style.top = `calc(50% + ${posY}px)`;
+                heart.style.transform = 'translate(-50%, -50%)';
+
+                const duration = 1.2 + (i % 5) * 0.15;
+                const delay = (i / totalHearts) * 1.2;
+                heart.style.animationDuration = `${duration}s`;
+                heart.style.animationDelay = `${delay}s`;
+
+                const size = 18 + (i % 4) * 2;
+                heart.style.fontSize = `${size}px`;
+
+                bigHeartContainer.appendChild(heart);
+            }
+
+            for (let i = 0; i < 24; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 70 + Math.random() * 130;
+                const sx = Math.cos(angle) * dist;
+                const sy = Math.sin(angle) * dist;
+                sparkle.style.left = `calc(50% + ${sx}px)`;
+                sparkle.style.top = `calc(50% + ${sy}px)`;
+                sparkle.style.setProperty('--tx', `${(Math.random() - 0.5) * 22}px`);
+                sparkle.style.setProperty('--ty', `${(Math.random() - 0.5) * 22}px`);
+                sparkle.style.animationDelay = `${Math.random() * 3}s`;
+                sparkle.style.animationDuration = `${2 + Math.random() * 2}s`;
+                bigHeartContainer.appendChild(sparkle);
+            }
+
+            let introDismissed = false;
+
+            // ========== BGM 背景音乐控制 ==========
+            const bgmBtn = document.getElementById('bgmBtn');
+            const bgmAudio = document.getElementById('bgmAudio');
+            const bgmIcon = document.getElementById('bgmIcon');
+            let isPlaying = false;
+            let bgmStarted = false;   // 标记是否已开始过播放
+
+            // 更新按钮视觉状态
+            function setPlayingState(playing) {
+                isPlaying = playing;
+                if (playing) {
+                    bgmBtn.classList.add('playing');
+                    bgmIcon.textContent = '🎶';
+                    bgmBtn.setAttribute('aria-label', '暂停背景音乐');
+                    bgmBtn.title = '暂停背景音乐';
+                } else {
+                    bgmBtn.classList.remove('playing');
+                    bgmIcon.textContent = '🎵';
+                    bgmBtn.setAttribute('aria-label', '播放背景音乐');
+                    bgmBtn.title = '播放背景音乐';
+                }
+            }
+
+            // 播放音乐（带错误处理）
+            function playBgm() {
+                const playPromise = bgmAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        setPlayingState(true);
+                        bgmStarted = true;
+                    }).catch((err) => {
+                        console.warn('音乐播放失败：', err);
+                        setPlayingState(false);
+                        // 文件缺失或路径错误时短暂提示
+                        if (err.name === 'NotSupportedError' || err.name === 'NotAllowedError') {
+                            bgmIcon.textContent = '⚠️';
+                            bgmBtn.title = '音乐文件未找到或格式不支持';
+                            setTimeout(() => {
+                                if (!isPlaying) {
+                                    bgmIcon.textContent = '🎵';
+                                    bgmBtn.title = '播放背景音乐';
+                                }
+                            }, 2000);
+                        }
+                    });
+                } else {
+                    // 旧版浏览器没有返回 promise
+                    setPlayingState(true);
+                    bgmStarted = true;
+                }
+            }
+
+            // 点击开屏界面：自动播放音乐 + 关闭开屏
+            function dismissIntro() {
+                if (introDismissed) return;
+                introDismissed = true;
+
+                // 关键：在用户点击开屏的同时触发音乐播放
+                playBgm();
+
+                heartIntro.classList.add('hide');
+                setTimeout(() => {
+                    bookWrapper.classList.add('show');
+                    initBook();
+                }, 200);
+                setTimeout(() => {
+                    heartIntro.style.display = 'none';
+                }, 1400);
+            }
+
+            heartIntro.addEventListener('click', dismissIntro);
+            setTimeout(() => {
+                if (!introDismissed) dismissIntro();
+            }, 5500);
+
+            // 右下角音乐按钮：手动播放/暂停
+            bgmBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isPlaying) {
+                    bgmAudio.pause();
+                    setPlayingState(false);
+                } else {
+                    playBgm();
+                }
+            });
+
+            // 音乐播放结束（loop 下不会触发，保底）
+            bgmAudio.addEventListener('ended', () => {
+                setPlayingState(false);
+            });
+
+            // 音频加载出错
+            bgmAudio.addEventListener('error', () => {
+                bgmBtn.title = '音乐文件未找到，请检查路径';
+                if (!isPlaying) {
+                    bgmIcon.textContent = '⚠️';
+                    setTimeout(() => {
+                        if (!isPlaying) {
+                            bgmIcon.textContent = '🎵';
+                            bgmBtn.title = '播放背景音乐';
+                        }
+                    }, 2000);
+                }
+            });
+
+            // ========== 图片放大（Lightbox） ==========
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            const lightboxClose = document.getElementById('lightboxClose');
+
+            function openLightbox(src, alt) {
+                lightboxImg.src = src;
+                lightboxImg.alt = alt || '放大的照片';
+                lightbox.classList.add('show');
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('show');
+                setTimeout(() => {
+                    if (!lightbox.classList.contains('show')) {
+                        lightboxImg.src = '';
+                    }
+                }, 300);
+            }
+
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox || e.target === lightboxClose) {
+                    closeLightbox();
+                }
+            });
+
+            lightboxClose.addEventListener('click', closeLightbox);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('show')) {
+                    closeLightbox();
+                }
+            });
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const img = item.querySelector('img');
+                    if (img) {
+                        openLightbox(img.src, img.alt);
+                    }
+                });
+            });
+
+            // ========== 书本拖拽翻页 ==========
+            const book = document.getElementById('book');
+            const pagesContainer = document.getElementById('pagesContainer');
+            let pages = [];
+            let currentIndex = 0;
+            let isDragging = false;
+            let startX = 0;
+            let dragDelta = 0;
+            const threshold = 80;
+
+            function initBook() {
+                pages = Array.from(document.querySelectorAll('.page'));
+                currentIndex = 0;
+                updatePageStyles();
+
+                book.addEventListener('mousedown', onDragStart);
+                window.addEventListener('mousemove', onDragMove);
+                window.addEventListener('mouseup', onDragEnd);
+
+                book.addEventListener('touchstart', onDragStart, { passive: false });
+                window.addEventListener('touchmove', onDragMove, { passive: false });
+                window.addEventListener('touchend', onDragEnd);
+
+                document.querySelectorAll('.page-counter .dot').forEach(dot => {
+                    dot.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const target = parseInt(dot.getAttribute('data-dot'));
+                        if (target !== currentIndex && !isDragging) {
+                            goToPage(target);
+                        }
+                    });
+                });
+
+                pagesContainer.addEventListener('dragstart', (e) => e.preventDefault());
+            }
+
+            function updatePageStyles() {
+                pages.forEach((page, idx) => {
+                    page.classList.remove('current', 'next', 'prev', 'hidden', 'dragging-next', 'dragging-prev');
+                    if (idx === currentIndex) {
+                        page.classList.add('current');
+                    } else if (idx < currentIndex) {
+                        page.classList.add('prev');
+                    } else if (idx === currentIndex + 1) {
+                        page.classList.add('next');
+                    } else {
+                        page.classList.add('hidden');
+                    }
+                });
+                document.querySelectorAll('.page-counter .dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentIndex);
+                });
+            }
+
+            function onDragStart(e) {
+                if (e.target.closest('input') || e.target.closest('button') || e.target.closest('video') || e.target.closest('.gallery-item')) return;
+                isDragging = true;
+                startX = getClientX(e);
+                dragDelta = 0;
+                pages.forEach(page => {
+                    page.style.transition = 'none';
+                });
+            }
+
+            function onDragMove(e) {
+                if (!isDragging) return;
+                const clientX = getClientX(e);
+                dragDelta = clientX - startX;
+
+                if (currentIndex === 0 && dragDelta > 0) {
+                    dragDelta = dragDelta * 0.3;
+                }
+                if (currentIndex === pages.length - 1 && dragDelta < 0) {
+                    dragDelta = dragDelta * 0.3;
+                }
+
+                const currentPage = pages[currentIndex];
+                const nextPage = pages[currentIndex + 1];
+                const prevPage = pages[currentIndex - 1];
+
+                if (dragDelta < 0 && nextPage) {
+                    const progress = Math.min(Math.abs(dragDelta) / 300, 1);
+                    currentPage.style.transform = `rotateY(${-progress * 45}deg)`;
+                    currentPage.style.opacity = `${1 - progress * 0.5}`;
+                    currentPage.style.filter = `brightness(${1 - progress * 0.1})`;
+                    nextPage.classList.remove('hidden');
+                    nextPage.style.transform = `rotateY(${(1 - progress) * 10}deg)`;
+                    nextPage.style.opacity = `${0.7 + progress * 0.3}`;
+                    nextPage.style.zIndex = 9;
+                } else if (dragDelta > 0 && prevPage) {
+                    const progress = Math.min(dragDelta / 300, 1);
+                    prevPage.classList.remove('hidden', 'prev');
+                    prevPage.classList.add('current');
+                    prevPage.style.transform = `rotateY(${(progress - 1) * 45}deg)`;
+                    prevPage.style.opacity = `${0.5 + progress * 0.5}`;
+                    prevPage.style.filter = `brightness(${0.9 + progress * 0.1})`;
+                    prevPage.style.zIndex = 11;
+                    currentPage.style.transform = `rotateY(${progress * 45}deg)`;
+                    currentPage.style.opacity = `${1 - progress * 0.5}`;
+                    currentPage.style.filter = `brightness(${1 - progress * 0.1})`;
+                }
+            }
+
+            function onDragEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+
+                const clientX = getClientX(e);
+                dragDelta = clientX - startX;
+
+                pages.forEach(page => {
+                    page.style.transition = '';
+                });
+
+                if (dragDelta < -threshold && currentIndex < pages.length - 1) {
+                    currentIndex++;
+                } else if (dragDelta > threshold && currentIndex > 0) {
+                    currentIndex--;
+                }
+
+                pages.forEach(page => {
+                    page.style.transform = '';
+                    page.style.opacity = '';
+                    page.style.filter = '';
+                    page.style.zIndex = '';
+                });
+
+                updatePageStyles();
+            }
+
+            function goToPage(targetIndex) {
+                if (targetIndex === currentIndex) return;
+                if (targetIndex < 0 || targetIndex >= pages.length) return;
+
+                pages.forEach(page => {
+                    page.style.transition = '';
+                });
+                pages.forEach(page => {
+                    page.style.transform = '';
+                    page.style.opacity = '';
+                    page.style.filter = '';
+                    page.style.zIndex = '';
+                });
+
+                currentIndex = targetIndex;
+                updatePageStyles();
+            }
+
+            function getClientX(e) {
+                return e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            }
+        })();
+    </script>
+</body>
+</html>
